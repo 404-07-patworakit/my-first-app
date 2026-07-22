@@ -1,0 +1,6 @@
+import steamlit as at
+st.title("แอปพลิเคชั่นแปลงปีพ.ศ เป็น ค.ศ.")
+
+bh_year=st.number_input("กรอกปี พ.ศ. ที่ต้องการแปลง", value=2569)
+ce_year=bh_year-543
+st.harder(f"ปี ค.ศ. คือ : {ce_year}")
