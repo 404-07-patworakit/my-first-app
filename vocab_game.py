@@ -109,4 +109,4 @@ if st.session_state.get("is_ended", False):
     show_result_dialog(ans1, ans2, ans3, ans4)
 
 st.divider()
-st.write("นายปรัชญ์วรกรกิตติ์ จันทรหทัยณัช เลขที่ 7 ม.4/4")
+st.write("นายปรัชญ์วรกิตติ์ จันทรุทัยณัช เลขที่ 7 ม.4/4")
