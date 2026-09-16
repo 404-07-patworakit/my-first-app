@@ -3,7 +3,7 @@ import streamlit as st
 # ตั้งค่าหน้าเว็บ
 st.set_page_config(page_title="อาหารนี้ชื่ออะไรกันนะ?", page_icon="🍲", layout="centered")
 
-# Custom CSS เพื่อตกแต่ง UI ให้ตรงตามรูปภาพ
+# Custom CSS เพื่อตกแต่ง UI ทั้งหมด
 st.markdown("""
 <style>
     /* พื้นหลังของแอป */
@@ -48,20 +48,26 @@ st.markdown("""
         font-weight: bold;
     }
 
-    /* ปุ่มส่งคำตอบ */
+    /* ปุ่มส่งคำตอบ (ปรับเป็นสีโทนเดียวและตัวอักษรสีขาว) */
     .stButton > button {
         width: 100%;
         border-radius: 20px;
-        background: linear-gradient(90deg, #00b4db, #0083b0);
-        color: white;
+        background-color: #0284c7 !important; /* สีฟ้าโทนเดียว */
+        color: #ffffff !important;             /* ตัวอักษรสีขาว */
         font-weight: bold;
         font-size: 1.2rem;
         padding: 10px;
         border: none;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        transition: background-color 0.2s ease;
     }
 
-    /* สไตล์สรุปผลคะแนนแบบในรูป */
+    .stButton > button:hover {
+        background-color: #0369a1 !important; /* สีเมื่อเอาเมาส์ไปชี้ */
+        color: #ffffff !important;
+    }
+
+    /* สไตล์สรุปผลคะแนน */
     .score-card {
         border: 2px solid #00e676;
         border-radius: 15px;
@@ -179,7 +185,7 @@ if not st.session_state.submitted:
             st.session_state.submitted = True
             st.rerun()
 
-# ==================== หน้าที่ 2: หน้าแสดงผลการแข่งขัน (สลับมาหน้านี้ทันที) ====================
+# ==================== หน้าที่ 2: หน้าแสดงผลการแข่งขัน ====================
 else:
     st.markdown("## 📊 ผลการแข่งขัน")
     
@@ -188,7 +194,7 @@ else:
     wrong_count = total_questions - correct_count
     evaluation_text = get_evaluation(correct_count)
 
-    # กล่องสรุปคะแนนตามแบบรูปภาพ
+    # กล่องสรุปคะแนน
     st.markdown(f"""
         <div class="score-card">
             <div class="score-title">คะแนนที่ได้: {correct_count} / {total_questions}</div>
@@ -203,7 +209,7 @@ else:
 
     st.markdown("### 📝 เฉลยอย่างละเอียด:")
 
-    # แสดงรายการเฉลยรายข้อตามสไตล์ในรูป
+    # แสดงรายการเฉลยรายข้อ
     for res in st.session_state.results_detail:
         if res["is_correct"]:
             st.markdown(
