@@ -1,9 +1,13 @@
-import tkinter as tk
-from tkinter import messagebox
+import streamlit as st
 
-# ---------------------------------------------------------
-# 1. ข้อมูลโจทย์และคำเฉลย
-# ---------------------------------------------------------
+# 1. ตั้งค่าหน้าเว็บ
+st.set_page_config(
+    page_title="อาหารนี้ชื่ออะไรกันนะ?",
+    page_icon="🍲",
+    layout="centered"
+)
+
+# 2. ข้อมูลโจทย์และคำเฉลย (ตามรูปที่ 1)
 questions_data = [
     {
         "hint": "เป็นเส้นเรียว สีเหลือง มีหลายแบบ หลายรสชาติ",
@@ -31,117 +35,107 @@ questions_data = [
     }
 ]
 
-# ---------------------------------------------------------
-# 2. ฟังก์ชันคำนวณเกณฑ์ประเมิน
-# ---------------------------------------------------------
+# 3. ฟังก์ชันคำนวณเกณฑ์ประเมินผู้เล่น (ตามรูปที่ 2)
 def get_evaluation(score):
-    if score == 0:
+    if score in [0, 1]:
         return "ไม่เคยกิน อาจจะเคย"
     elif score in [1, 2]:
         return "รู้จักพอผ่านๆ"
     elif score in [3, 4]:
         return "กินบ้างไม่กินบ้าง"
-    elif score == 5:
+    elif score in [5, 6]:
         return "เกือบเป็นเซียนอาหารไทย"
     elif score == 6:
         return "เซียนอาหารไทย"
-    return ""
+    return "ไม่เคยกิน อาจจะเคย"
 
-# ---------------------------------------------------------
-# 3. การสร้างหน้าต่าง GUI
-# ---------------------------------------------------------
-root = tk.Tk()
-root.title("อาหารนี้ชื่ออะไรกันนะ?")
-root.geometry("650x700")
-root.configure(bg="#ffffff")
+# 4. สไตล์ CSS ตกแต่งให้ตรงกับรูปที่ 3 (กล่องคำใบ้และช่องกรอกสีฟ้า)
+st.markdown("""
+    <style>
+    /* สไตล์ปุ่มคำใบ้รูปทรงมน สีฟ้า */
+    .hint-card {
+        background-color: #00b4d8;
+        color: white;
+        padding: 18px 15px;
+        border-radius: 20px;
+        text-align: center;
+        font-size: 16px;
+        font-weight: bold;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        margin-top: 10px;
+    }
+    /* ปรับแต่งช่อง Input ให้โค้งมนสวยงาม */
+    div[data-baseweb="input"] > div {
+        background-color: #00b4d8 !important;
+        border-radius: 15px !important;
+        color: white !important;
+    }
+    div[data-baseweb="input"] input {
+        color: white !important;
+        font-weight: bold;
+    }
+    /* ซ่อนเส้นขอบขยะบางส่วน */
+    hr {
+        margin: 1em 0;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-# ตัวแปรสำหรับเก็บสภาวะคำตอบและคะแนน
-entry_widgets = []
-status_labels = []
-user_answers = [""] * len(questions_data)
-scores = [0] * len(questions_data)
+# 5. หัวข้อเกม (ตามรูปที่ 3)
+st.markdown("<h1 style='text-align: center;'>ชื่อเกม</h1>", unsafe_allow_html=True)
+st.markdown("<h3 style='text-align: center; color: #555;'>อาหารนี้ชื่ออะไรกันนะ?</h3>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'>ให้ผู้เล่นเติมคำตอบลงในช่องข้อความให้ถูกต้อง แล้วกดส่งคำตอบข้างคำถาม</p>", unsafe_allow_html=True)
+st.write("")
 
-# หัวข้อเกม
-title_label = tk.Label(root, text="อาหารนี้ชื่ออะไรกันนะ?", font=("Tahoma", 20, "bold"), bg="#ffffff", fg="#000000")
-title_label.pack(pady=(20, 5))
+# สร้างตัวแปรเก็บสถานะการตอบคำถามใน Session State
+if "answers" not in st.session_state:
+    st.session_state.answers = {}
 
-subtitle_label = tk.Label(root, text="ให้ผู้เล่นเติมคำตอบลงในช่องข้อความให้ถูกต้อง แล้วกดส่งคำตอบข้างคำถาม", font=("Tahoma", 11), bg="#ffffff", fg="#333333")
-subtitle_label.pack(pady=(0, 20))
-
-# ส่วนแสดงคำถามแต่ละข้อ
-frame_questions = tk.Frame(root, bg="#ffffff")
-frame_questions.pack(padx=20, fill="both", expand=True)
-
-def submit_answer(index):
-    ans = entry_widgets[index].get().strip()
-    if not ans:
-        messagebox.showwarning("เตือน", "กรุณากรอกคำตอบก่อนกดส่ง")
-        return
-    
-    correct_ans = questions_data[index]["answer"]
-    if ans == correct_ans:
-        scores[index] = 1
-        status_labels[index].config(text="✓ ถูกต้อง", fg="green")
-    else:
-        scores[index] = 0
-        status_labels[index].config(text="✕ ผิด", fg="red")
-    
-    update_score_and_eval()
-
-def update_score_and_eval():
-    total_score = sum(scores)
-    evaluation = get_evaluation(total_score)
-    
-    score_val_label.config(text=f"{total_score} / 6")
-    eval_val_label.config(text=f"{evaluation}")
-
+# 6. สร้างรายการคำถาม 6 ข้อ
 for i, q in enumerate(questions_data):
-    # แถวของแต่ละข้อ
-    row_frame = tk.Frame(frame_questions, bg="#ffffff")
-    row_frame.pack(fill="x", pady=6)
+    col_left, col_right = st.columns([1.1, 1], gap="medium")
+    
+    with col_left:
+        st.markdown(f"**คำถาม {i+1}: abc**")
+        
+        # ช่องกรอกคำตอบ และ ปุ่มส่งคำตอบ ในบรรทัดเดียวกัน
+        c_input, c_btn = st.columns([3, 1])
+        with c_input:
+            user_ans = st.text_input(
+                label=f"q_{i}", 
+                key=f"input_{i}", 
+                label_visibility="collapsed",
+                placeholder="พิมพ์คำตอบที่นี่..."
+            )
+        with c_btn:
+            submitted = st.button("กด", key=f"btn_{i}")
+            if submitted:
+                # ตรวจสอบคำตอบ
+                if user_ans.strip() == q["answer"]:
+                    st.session_state.answers[i] = True
+                else:
+                    st.session_state.answers[i] = False
 
-    # ด้านซ้าย (คำถาม, ช่องกรอก, ปุ่มกดส่ง, แสดงผลถูก/ผิด)
-    left_frame = tk.Frame(row_frame, bg="#ffffff")
-    left_frame.pack(side="left", anchor="w")
+        # แสดงสถานะ ถูก/ผิด ด้านล่างช่องกรอก
+        if i in st.session_state.answers:
+            if st.session_state.answers[i]:
+                st.success("✓ ถูกต้อง")
+            else:
+                st.error("✕ ผิด")
 
-    q_label = tk.Label(left_frame, text=f"คำถาม {i+1}:", font=("Tahoma", 11, "bold"), bg="#ffffff")
-    q_label.grid(row=0, column=0, sticky="w", columnspan=2)
+    with col_right:
+        # แสดงกล่องคำใบ้
+        st.markdown(f"""
+            <div class="hint-card">
+                คำใบ้: {q['hint']}
+            </div>
+        """, unsafe_allow_html=True)
+    
+    st.write("---")
 
-    entry = tk.Entry(left_frame, font=("Tahoma", 11), width=18, bg="#00b4d8", fg="white", insertbackground="white")
-    entry.grid(row=1, column=0, pady=2, padx=(0, 5))
-    entry_widgets.append(entry)
+# 7. สรุปคะแนนและเกณฑ์ประเมิน (ด้านล่างสุด)
+total_score = sum(1 for is_correct in st.session_state.answers.values() if is_correct)
+evaluation_result = get_evaluation(total_score)
 
-    btn_submit = tk.Button(left_frame, text="ส่ง", font=("Tahoma", 9), bg="#00b4d8", fg="white", activebackground="#0077b6", activeforeground="white", command=lambda idx=i: submit_answer(idx))
-    btn_submit.grid(row=1, column=1)
-
-    status_lbl = tk.Label(left_frame, text="", font=("Tahoma", 10, "bold"), bg="#ffffff")
-    status_lbl.grid(row=1, column=2, padx=5)
-    status_labels.append(status_lbl)
-
-    # ด้านขวา (กล่องคำใบ้)
-    right_frame = tk.Frame(row_frame, bg="#ffffff")
-    right_frame.pack(side="right", fill="x", expand=True, padx=(20, 0))
-
-    hint_box = tk.Label(right_frame, text=f"คำใบ้: {q['hint']}", font=("Tahoma", 10), bg="#00b4d8", fg="white", wraplength=280, justify="left", padding=8)
-    hint_box.pack(fill="x")
-
-# ---------------------------------------------------------
-# 4. ส่วนสรุปคะแนนและเกณฑ์ประเมิน
-# ---------------------------------------------------------
-frame_result = tk.Frame(root, bg="#ffffff")
-frame_result.pack(fill="x", padx=30, pady=20)
-
-score_title_label = tk.Label(frame_result, text="คะแนนที่ได้:", font=("Tahoma", 12, "bold"), bg="#ffffff")
-score_title_label.grid(row=0, column=0, sticky="w")
-
-score_val_label = tk.Label(frame_result, text="0 / 6", font=("Tahoma", 12), bg="#ffffff", fg="#00b4d8")
-score_val_label.grid(row=0, column=1, sticky="w", padx=10)
-
-eval_title_label = tk.Label(frame_result, text="เกณฑ์:", font=("Tahoma", 12, "bold"), bg="#ffffff")
-eval_title_label.grid(row=1, column=0, sticky="w", pady=(5, 0))
-
-eval_val_label = tk.Label(frame_result, text="ไม่เคยกิน อาจจะเคย", font=("Tahoma", 12), bg="#ffffff", fg="#00b4d8")
-eval_val_label.grid(row=1, column=1, sticky="w", padx=10, pady=(5, 0))
-
-# เริ่มการทำงานของโปรแกรม
-root.mainloop()
+st.markdown(f"### คะแนนที่ได้: `{total_score} / 6`")
+st.markdown(f"### เกณฑ์: `{evaluation_result}`")
